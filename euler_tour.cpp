@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <deque>
 #include <sstream>
-#include <algorithm> // Include this for std::find
+#include <algorithm> // Include this for find
 
 using namespace std;
 
@@ -44,6 +44,17 @@ vector<int> findEulerianPath(int n, const vector<pair<int, int>> &edges) {
         edge_count[edge.first]++;
         edge_count[edge.second]++;
     }
+	
+    //test
+    for (const auto &adjs : adj){
+	    cout<<"adj"<<endl;
+	    cout<<adjs.first<<" : "<<endl;
+	for(const auto &edge: adjs.second){
+		cout<<edge<<",";
+	}
+	cout<<endl;
+    }
+    //test
 
     // Find the starting point: start with a vertex with an odd degree if it exists
     int start = 0;
@@ -65,7 +76,7 @@ vector<int> findEulerianPath(int n, const vector<pair<int, int>> &edges) {
         if (!adj[u].empty()) {
             int v = adj[u].back();
             adj[u].pop_back();
-            auto it = find(adj[v].begin(), adj[v].end(), u);
+            auto it = find(adj[v].begin(), adj[v].end(), u); // fubd vertuces of prev vertex
             if (it != adj[v].end()) {
                 adj[v].erase(it);
             }
@@ -80,7 +91,7 @@ vector<int> findEulerianPath(int n, const vector<pair<int, int>> &edges) {
 }
 
 int main() {
-    string filename = "graphs.txt";
+    string filename = "test.txt";
     vector<pair<int, vector<pair<int, int>>>> graphs = readGraphs(filename);
 
     for (const auto &graph : graphs) {
@@ -96,4 +107,4 @@ int main() {
     }
 
     return 0;
-}
+} 
