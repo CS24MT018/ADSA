@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 #include <sstream>
 
 using namespace std;
@@ -42,26 +41,21 @@ bool isHamiltonianCycle(const vector<int> &perm, const vector<vector<int>> &adj)
 }
 
 // Recursive function to generate permutations and check for Hamiltonian cycle
-bool findHamiltonianCycleHelper(vector<int> &perm, int l, int r, const vector<vector<int>> &adj, vector<int> &result) {
+void generatePermutations(vector<int> &perm, int l, int r, const vector<vector<int>> &adj, vector<int> &result, bool &found) {
     if (l == r) {
         if (isHamiltonianCycle(perm, adj)) {
             result = perm;
-            return true;
+            found = true;
         }
-        return false;
     } else {
         for (int i = l; i <= r; i++) {
             swap(perm[l], perm[i]);
-            if (findHamiltonianCycleHelper(perm, l + 1, r, adj, result)) {
-                return true;
-            }
+            generatePermutations(perm, l + 1, r, adj, result, found);
             swap(perm[l], perm[i]); // Backtrack
         }
     }
-    return false;
 }
 
-// Function to find Hamiltonian cycle using permutations
 vector<int> findHamiltonianCycle(int n, const vector<pair<int, int>> &edges) {
     vector<vector<int>> adj(n, vector<int>(n, 0));
     for (const auto &edge : edges) {
@@ -75,7 +69,10 @@ vector<int> findHamiltonianCycle(int n, const vector<pair<int, int>> &edges) {
     }
 
     vector<int> result;
-    if (findHamiltonianCycleHelper(perm, 1, n - 1, adj, result)) {
+    bool found = false;
+    generatePermutations(perm, 1, n - 1, adj, result, found); // Fix the first element to reduce the search space
+
+    if (found) {
         return result;
     }
 
