@@ -8,7 +8,15 @@
 
 using namespace std;
 
-// Function to convert string to lowercase
+// Hash function to compute hash value for a word
+int hashFunction(const string& word, int M) {
+    int sum = 0;
+    for (char c : word) {
+        sum += static_cast<int>(c); // Convert char c into ASCII value
+    }
+    return sum % M;
+}
+
 string toLowercase(const string& s) {
     string result = s;
     for (char& c : result) {
@@ -17,11 +25,31 @@ string toLowercase(const string& s) {
     return result;
 }
 
-// Function to get the sorted version of a word
+// Function to get sorted word
 string getSortedWord(const string& word) {
-    string sortedWord = toLowercase(word); // Ensure it's lowercase
-    sort(sortedWord.begin(), sortedWord.end()); // Sort the characters
-    return sortedWord; // Return sorted word
+    string sortedWord = toLowercase(word);
+    sort(sortedWord.begin(), sortedWord.end());
+    return sortedWord;
+}
+
+// Function to check if two words are anagrams
+bool areAnagrams(const string& word1, const string& word2) {
+    string w1 = toLowercase(word1);
+    string w2 = toLowercase(word2);
+
+    if (w1.length() != w2.length()) {
+        return false;
+    }
+
+    unordered_map<char, int> charCount;
+    for (char c : w1) {
+        charCount[c]++;
+    }
+    for (char c : w2) {
+        charCount[c]--;
+        if (charCount[c] < 0) return false;
+    }
+    return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -31,10 +59,11 @@ int main(int argc, char* argv[]) {
     }
 
     string wordsFile = argv[1];
+    int M = stoi(argv[2]);
     string queryFile = argv[3];
 
-    // Hash table for storing words with their sorted versions as keys
-    unordered_map<string, list<string>> hashTable;
+    // Hash table for storing words with chaining
+    unordered_map<string, list<string>> hashTable; // Changed to use unordered_map
 
     // Load words from words.txt into hash table
     ifstream wordStream(wordsFile);
@@ -45,18 +74,23 @@ int main(int argc, char* argv[]) {
 
     string word;
     while (getline(wordStream, word)) {
-        string sortedWord = getSortedWord(word); // Get the sorted version
-        hashTable[sortedWord].push_back(word); // Store original word in the list
+        string sortedWord = getSortedWord(word); // Get sorted version
+        hashTable[sortedWord].push_front(word);  // Insert at the beginning of the linked list
     }
     wordStream.close();
 
-    // Print the hash table with all values and linked lists
+    // Print the hash table with the desired format
+    int index = 0; // To keep track of the index for output
     for (const auto& entry : hashTable) {
-        cout << "Key (sorted): " << entry.first << " -> ";
-        for (const string& storedWord : entry.second) {
-            cout << storedWord << " -> ";
+        const list<string>& anagrams = entry.second; // Get the list of anagrams
+
+        if (!anagrams.empty()) {
+            cout << "Index " << index++ << ": "; // Print index
+            for (const string& storedWord : anagrams) {
+                cout << storedWord << " -> "; // Print each anagram
+            }
+            cout << "End" << endl; // End of list
         }
-        cout << "End" << endl;
     }
 
     // Read query.txt file to process queries and find anagrams
@@ -83,7 +117,7 @@ int main(int argc, char* argv[]) {
             // Write anagrams to the output file (reverse order, as required)
             vector<string> anagramList(anagrams.begin(), anagrams.end());
             reverse(anagramList.begin(), anagramList.end()); // Reverse order
-            
+
             for (size_t i = 0; i < anagramList.size(); i++) {
                 outputStream << anagramList[i];
                 if (i != anagramList.size() - 1) {
@@ -96,7 +130,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Close streams
     queryStream.close();
     outputStream.close();
 
